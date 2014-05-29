@@ -11,11 +11,16 @@ import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
-import java.util.Arrays;
+import java.security.spec.RSAPublicKeySpec;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.crypto.KeyGenerator;
+import javax.crypto.SecretKey;
+import javax.swing.DefaultComboBoxModel;
+import javax.swing.SpinnerNumberModel;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
+import sun.misc.BASE64Encoder;
 
 /**
  *
@@ -31,6 +36,7 @@ public class RSAKeyPairGenerator extends javax.swing.JFrame {
     }
     
     int posX=0,posY=0;
+    int convertIndex = 0;
 
     /**
      * This method is called from within the constructor to initialize the form.
@@ -63,17 +69,17 @@ public class RSAKeyPairGenerator extends javax.swing.JFrame {
         jButton3 = new javax.swing.JButton();
         jButton2 = new javax.swing.JButton();
         jComboBox1 = new javax.swing.JComboBox();
-        jComboBox2 = new javax.swing.JComboBox();
+        jComboBox4 = new javax.swing.JComboBox();
+        jSpinner1 = new javax.swing.JSpinner();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setMaximumSize(new java.awt.Dimension(614, 355));
         setName("RSA KeyPair Generator"); // NOI18N
-        setUndecorated(true);
         setResizable(false);
+        setUndecorated(true);
 
         jPanel1.setBackground(new java.awt.Color(55, 54, 52));
         jPanel1.setMaximumSize(new java.awt.Dimension(612, 421));
-        jPanel1.setPreferredSize(new java.awt.Dimension(614, 355));
         jPanel1.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mousePressed(java.awt.event.MouseEvent evt) {
                 jPanel1MousePressed(evt);
@@ -150,7 +156,7 @@ public class RSAKeyPairGenerator extends javax.swing.JFrame {
         jLabel3.setFont(new java.awt.Font("Tahoma", 1, 36)); // NOI18N
         jLabel3.setForeground(new java.awt.Color(153, 153, 153));
         jLabel3.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        jLabel3.setText("[ RSA Key Pair Generator ]");
+        jLabel3.setText("[ Crypto Key Generator ]");
 
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
@@ -217,8 +223,10 @@ public class RSAKeyPairGenerator extends javax.swing.JFrame {
             }
         });
 
-        jComboBox1.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "RSA", "DES", "AES" }));
+        jComboBox1.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Binary", "Decimal", "Base64", "Hex" }));
+        jComboBox1.setBorder(null);
         jComboBox1.setMinimumSize(new java.awt.Dimension(60, 23));
+        jComboBox1.setOpaque(false);
         jComboBox1.setPreferredSize(new java.awt.Dimension(60, 23));
         jComboBox1.addItemListener(new java.awt.event.ItemListener() {
             public void itemStateChanged(java.awt.event.ItemEvent evt) {
@@ -226,9 +234,20 @@ public class RSAKeyPairGenerator extends javax.swing.JFrame {
             }
         });
 
-        jComboBox2.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "32", "64", "128", "256", "512", "1024", "2048" }));
-        jComboBox2.setMinimumSize(new java.awt.Dimension(60, 23));
-        jComboBox2.setPreferredSize(new java.awt.Dimension(60, 23));
+        jComboBox4.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "RSA", "DES", "AES", "DH", "RC2", "RC4" }));
+        jComboBox4.setBorder(null);
+        jComboBox4.setMinimumSize(new java.awt.Dimension(60, 23));
+        jComboBox4.setOpaque(false);
+        jComboBox4.setPreferredSize(new java.awt.Dimension(60, 23));
+        jComboBox4.addItemListener(new java.awt.event.ItemListener() {
+            public void itemStateChanged(java.awt.event.ItemEvent evt) {
+                jComboBox4ItemStateChanged(evt);
+            }
+        });
+
+        jSpinner1.setModel(new SpinnerNumberModel(512, 512, 2048, 1));
+        jSpinner1.setOpaque(false);
+        jSpinner1.setPreferredSize(new java.awt.Dimension(60, 23));
 
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
@@ -237,7 +256,7 @@ public class RSAKeyPairGenerator extends javax.swing.JFrame {
             .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addComponent(filler1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addGap(6, 6, 6))
+                .addGap(347, 347, 347))
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                     .addComponent(filler3, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
@@ -254,11 +273,15 @@ public class RSAKeyPairGenerator extends javax.swing.JFrame {
                                 .addComponent(jLabel7)
                                 .addGap(18, 18, 18)
                                 .addComponent(jTextField2))
-                            .addComponent(filler6, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addGroup(jPanel1Layout.createSequentialGroup()
+                                .addComponent(filler6, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addGap(66, 66, 66))
                             .addGroup(jPanel1Layout.createSequentialGroup()
                                 .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                .addComponent(jComboBox2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))))
+                                .addComponent(jComboBox4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(jSpinner1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                     .addGroup(jPanel1Layout.createSequentialGroup()
@@ -311,7 +334,8 @@ public class RSAKeyPairGenerator extends javax.swing.JFrame {
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addComponent(jComboBox1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jComboBox2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addComponent(jComboBox4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jSpinner1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 9, Short.MAX_VALUE)
                         .addComponent(filler3, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE))))
         );
@@ -324,7 +348,7 @@ public class RSAKeyPairGenerator extends javax.swing.JFrame {
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, 358, Short.MAX_VALUE)
+            .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         );
 
         pack();
@@ -379,12 +403,23 @@ public class RSAKeyPairGenerator extends javax.swing.JFrame {
     private void jButton1MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jButton1MouseClicked
         System.gc();
         try {
-            KeyPairGenerator gen = KeyPairGenerator.getInstance((String)jComboBox1.getSelectedItem());
-            gen.initialize(Integer.valueOf((String)jComboBox2.getSelectedItem()), new SecureRandom());
-            KeyPair keyPair = gen.genKeyPair();
+            if(((String)jComboBox4.getSelectedItem()).equals("RSA") || ((String)jComboBox4.getSelectedItem()).equals("DH")){
+                KeyPairGenerator gen = KeyPairGenerator.getInstance((String)jComboBox4.getSelectedItem());
+                gen.initialize((int)jSpinner1.getValue(), new SecureRandom());
+                KeyPair keyPair = gen.genKeyPair();
+                
+                jTextField1.setText(convert(keyPair.getPrivate().getEncoded()));
+                jTextField2.setText(convert(keyPair.getPublic().getEncoded()));
+            }else{
+                KeyGenerator gen = KeyGenerator.getInstance((String)jComboBox4.getSelectedItem());
+                gen.init((int)jSpinner1.getValue(), new SecureRandom());
+                SecretKey key = gen.generateKey();
+                
+                jTextField1.setText(convert(key.getEncoded()));
+                jTextField2.setText("");
+            }
             
-            jTextField1.setText(keyToHexString(keyPair.getPrivate().getEncoded()));
-            jTextField2.setText(keyToHexString(keyPair.getPublic().getEncoded()));
+            
             
             jTextField1.setCaretPosition(0);
             jTextField2.setCaretPosition(0);
@@ -411,29 +446,72 @@ public class RSAKeyPairGenerator extends javax.swing.JFrame {
     }//GEN-LAST:event_jButton3MouseClicked
 
     private void jComboBox1ItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_jComboBox1ItemStateChanged
-        switch((String)evt.getItem()){
-            case "RSA":
-                jLabel7.setVisible(true);
-                jTextField2.setVisible(true);
-                
-                break;
-            case "DES":
-                jLabel7.setVisible(false);
-                jTextField2.setVisible(false);
-                break;
-            case "AES":
-                jLabel7.setVisible(false);
-                jTextField2.setVisible(false);
-                break;
-        }
+        convertIndex = jComboBox1.getSelectedIndex();
     }//GEN-LAST:event_jComboBox1ItemStateChanged
 
-    private String keyToHexString(byte[] key){
-        StringBuilder retString = new StringBuilder();
-        for (int i = 0; i < key.length; ++i) {
-            retString.append(Integer.toHexString(0x0100 + (key[i] & 0x00FF)).substring(1));
+    private void jComboBox4ItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_jComboBox4ItemStateChanged
+        switch((String)evt.getItem()){
+            case "RSA":
+                jLabel7.setEnabled(true);
+                jTextField2.setEnabled(true);
+                jButton3.setEnabled(true);
+                
+                jSpinner1.setModel(new SpinnerNumberModel(512, 512, 2048, 1));
+                break;
+            case "DH":
+                jLabel7.setEnabled(true);
+                jTextField2.setEnabled(true);
+                jButton3.setEnabled(true);
+                
+                jSpinner1.setModel(new SpinnerNumberModel(512, 512, 1024, 64));
+                break;
+            case "AES":
+                jLabel7.setEnabled(false);
+                jTextField2.setEnabled(false);
+                jButton3.setEnabled(false);
+                
+                jSpinner1.setModel(new SpinnerNumberModel(128, 128, 256, 64));
+                break;
+            case "DES":
+                jLabel7.setEnabled(false);
+                jTextField2.setEnabled(false);
+                jButton3.setEnabled(false);
+                
+                jSpinner1.setModel(new SpinnerNumberModel(56, 56, 56, 0));
+                break;
+            case "RC2":
+                jLabel7.setEnabled(false);
+                jTextField2.setEnabled(false);
+                jButton3.setEnabled(false);
+                
+                jSpinner1.setModel(new SpinnerNumberModel(40, 40, 1024, 1));
+                break;
         }
-        return retString.toString();
+    }//GEN-LAST:event_jComboBox4ItemStateChanged
+    
+    private String convert(byte[] key){
+        StringBuilder retString = new StringBuilder();
+        switch(convertIndex){
+            case 0://Binary
+                for(byte e : key){
+                    retString.append(Integer.toBinaryString(e));
+                }
+                return retString.toString();
+            case 1://Decimal
+                for(byte e : key){
+                    retString.append(e);
+                }
+                return retString.toString();
+            case 2://Base 64
+                BASE64Encoder en = new BASE64Encoder();
+                return en.encode(key);
+            case 3://Hex
+                for (byte e : key) {
+                    retString.append(Integer.toHexString(0x0100 + (e & 0x00FF)).substring(1));
+                }
+                return retString.toString(); 
+        }
+        return "";
     }
     
     /**
@@ -494,7 +572,7 @@ public class RSAKeyPairGenerator extends javax.swing.JFrame {
     private javax.swing.JButton jButton2;
     private javax.swing.JButton jButton3;
     private javax.swing.JComboBox jComboBox1;
-    private javax.swing.JComboBox jComboBox2;
+    private javax.swing.JComboBox jComboBox4;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
@@ -505,6 +583,7 @@ public class RSAKeyPairGenerator extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel8;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
+    private javax.swing.JSpinner jSpinner1;
     private javax.swing.JTextField jTextField1;
     private javax.swing.JTextField jTextField2;
     // End of variables declaration//GEN-END:variables
